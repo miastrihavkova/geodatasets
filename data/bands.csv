@@ -1,0 +1,16 @@
+# Source: ESA Sentinel-2 MSI specification
+# https://gisgeography.com/sentinel-2-bands-combinations/
+id,name,wavelength_nm,gsd_m
+1,Coastal aerosol,443,60
+2,Blue,490,10
+3,Green,560,10
+4,Red,665,10
+5,Red Edge 1,705,20
+6,Red Edge 2,740,20
+7,Red Edge 3,783,20
+8,NIR,842,10
+8A,NIR narrow,865,20
+9,Water vapour,945,60
+10,Cirrus,1375,60
+11,SWIR 1,1610,20
+12,SWIR 2,2190,20

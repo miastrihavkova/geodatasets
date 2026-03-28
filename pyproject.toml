@@ -7,9 +7,22 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "requests>=2.32",
+    "tqdm>=4.67",
+    "numpy (>=2.4.3,<3.0.0)",
+    "pandas (>=3.0.1,<4.0.0)",
+    "plotly (>=6.6.0,<7.0.0)",
+    "pillow (>=12.1.1,<13.0.0)",
+    "nbformat (>=5.10.4,<6.0.0)",
 ]
 
+[project.scripts]
+geodatasets-download = "geodatasets.scripts.download:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "ipykernel (>=7.2.0,<8.0.0)"
+]
