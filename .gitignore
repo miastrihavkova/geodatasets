@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.poetry/
+dist/
+build/
+data/
