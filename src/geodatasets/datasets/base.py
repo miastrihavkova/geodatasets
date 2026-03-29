@@ -1,3 +1,5 @@
+"""Base PyTorch dataset for geodatasets."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -13,6 +15,17 @@ VALID_SPLITS = {"train", "val", "test"}
 
 
 class BaseDataset(ABC, Dataset):
+    """Abstract base dataset class for geodatasets.
+
+    Args:
+        dataset_dir: Path to the dataset directory containing 'images/' and 'masks/' subdirectories.
+        tiles_csv: Path to the CSV file describing the tiles and their metadata.
+        split: Optional subset of the data to use, one of 'train', 'val', or 'test'.
+        bands: List of band indices to load (0-12), or None to load all bands. Defaults to None.
+        transform: Optional transform to apply to images.
+        target_transform: Optional transform to apply to masks.
+    """
+
     def __init__(
         self,
         dataset_dir: Path,

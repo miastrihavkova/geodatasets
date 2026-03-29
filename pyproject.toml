@@ -36,7 +36,8 @@ dev = [
     "ruff (>=0.15.8,<0.16.0)",
     "mypy (>=1.19.1,<2.0.0)",
     "types-requests (>=2.33.0.20260327,<3.0.0.0)",
-    "types-pyyaml (>=6.0.12.20250915,<7.0.0.0)"
+    "types-pyyaml (>=6.0.12.20250915,<7.0.0.0)",
+    "pydocstyle (>=6.3.0,<7.0.0)"
 ]
 
 [tool.ruff]
@@ -52,3 +53,8 @@ addopts   = "-v --tb=short"
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.pydocstyle]
+convention = "google"
+add-ignore = ["D107", "D105"]
+match = "(?!test_).*\\.py"

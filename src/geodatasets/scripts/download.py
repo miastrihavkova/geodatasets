@@ -1,3 +1,5 @@
+"""Download and extract files from a Zenodo record, with checksum validation and progress bars."""
+
 import argparse
 import hashlib
 import logging
@@ -17,6 +19,7 @@ SKIP_FILES: set[str] = set()
 
 
 def md5_of(path: Path) -> str:
+    """Calculate the MD5 checksum of a file."""
     h = hashlib.md5()
     with path.open("rb") as fh:
         for chunk in iter(lambda: fh.read(CHUNK), b""):
@@ -25,6 +28,7 @@ def md5_of(path: Path) -> str:
 
 
 def checksum_matches(path: Path, expected: str) -> bool:
+    """Check if the file's MD5 checksum matches the expected value."""
     actual = md5_of(path)
     if actual != expected:
         log.error(
@@ -37,10 +41,12 @@ def checksum_matches(path: Path, expected: str) -> bool:
 
 
 def strip_md5_prefix(raw: str) -> str | None:
+    """If the checksum string has an MD5 prefix, strip it and return the rest, otherwise None."""
     return raw.removeprefix("md5:") if raw.startswith("md5:") else None
 
 
 def fetch_record_files(record_id: str) -> list[dict]:
+    """Fetch the list of files associated with a zenodo record."""
     resp = requests.get(f"{ZENODO_API}/{record_id}", timeout=30)
     resp.raise_for_status()
     return resp.json()["files"]
@@ -57,6 +63,7 @@ def is_fresh(path: Path, expected_md5: str | None) -> bool:
 
 
 def download(url: str, dest: Path) -> None:
+    """Download a file from the given URL to the destination path, showing a progress bar."""
     resp = requests.get(url, stream=True, timeout=60)
     resp.raise_for_status()
     total = int(resp.headers.get("content-length", 0))
@@ -71,6 +78,7 @@ def download(url: str, dest: Path) -> None:
 
 
 def download_file(url: str, dest: Path, expected_md5: str | None) -> None:
+    """Download a file unless it doesn't exist or fails checksum validation."""
     if is_fresh(dest, expected_md5):
         return
 
@@ -83,12 +91,14 @@ def download_file(url: str, dest: Path, expected_md5: str | None) -> None:
 
 
 def extract_zip(archive: Path, dest: Path) -> None:
+    """Extract a zip archive to the destination directory."""
     log.info("Extracting %s → %s", archive.name, dest)
     with zipfile.ZipFile(archive) as zf:
         zf.extractall(dest)
 
 
 def download_record(record_id: str, output_dir: Path, *, extract: bool = True) -> None:
+    """Download all files from a Zenodo record, optionally extracting zip files."""
     output_dir.mkdir(parents=True, exist_ok=True)
     files = fetch_record_files(record_id)
     log.info("Found %d file(s) in record %s", len(files), record_id)
@@ -106,6 +116,7 @@ def download_record(record_id: str, output_dir: Path, *, extract: bool = True) -
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse CLI arguments."""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--record-id", default="4172871", help="Zenodo record ID")
     p.add_argument("--output-dir", type=Path, default=Path("data/raw"), help="Download destination")
@@ -114,6 +125,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Main entry point for the script."""
     args = parse_args()
     download_record(args.record_id, args.output_dir, extract=args.extract)
 

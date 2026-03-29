@@ -1,3 +1,5 @@
+"""Writer for GeoTIFF format using rasterio."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -9,7 +11,19 @@ from .base import BaseWriter
 
 
 class GeoTIFFWriter(BaseWriter):
+    """Writes one GeoTIFF file per tile with LZW compression."""
+
     def write_tile(self, tile_id: str, image: np.ndarray, mask: np.ndarray) -> tuple[str, str]:
+        """Writes single tile.
+
+        Args:
+            tile_id: Unique identifier for the tile, used as filename (without extension).
+            image: Image data to write.
+            mask: Mask data to write.
+
+        Returns:
+            tuple[str, str]: Paths to the written image and mask files.
+        """
         H, W, C = image.shape
         transform = from_bounds(0, 0, W, H, W, H)
         crs = CRS.from_epsg(4326)
@@ -53,4 +67,4 @@ class GeoTIFFWriter(BaseWriter):
         return f"{tile_id}.tif", f"{tile_id}.tif"
 
     def finalise(self) -> None:
-        pass
+        """No finalisation needed for GeoTIFFWriter."""

@@ -1,3 +1,5 @@
+"""HDF5 dataset format for geodatasets."""
+
 from __future__ import annotations
 
 import h5py
@@ -8,6 +10,8 @@ from .base import BaseDataset
 
 
 class HDF5Dataset(BaseDataset):
+    """Dataset class for geodatasets in HDF5 format. Implements abstract BaseDataset."""
+
     def __init__(self, dataset_dir, tiles_csv, **kwargs) -> None:
         super().__init__(dataset_dir, tiles_csv, **kwargs)
         self._img_path = self.dataset_dir / "images" / "images.h5"

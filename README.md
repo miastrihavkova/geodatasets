@@ -209,4 +209,7 @@ poetry run ruff format src/ tests/
 
 # Type check
 poetry run mypy src/
+
+# Documentation check
+poetry run pydocstyle src/
 ```

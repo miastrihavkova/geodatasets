@@ -1,3 +1,5 @@
+"""GeoTIFF dataset format for geodatasets."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -8,6 +10,8 @@ from .base import BaseDataset
 
 
 class GeoTIFFDataset(BaseDataset):
+    """Dataset class for geodatasets in GeoTIFF format. Implements abstract BaseDataset."""
+
     def _load_tile(self, row: pd.Series) -> tuple[np.ndarray, np.ndarray]:
         img_path = self.dataset_dir / "images" / row["image_filename"]
         mask_path = self.dataset_dir / "masks" / row["mask_filename"]

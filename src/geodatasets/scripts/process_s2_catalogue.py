@@ -1,3 +1,5 @@
+"""Process the raw S2 Cloud Mask Catalogue into tiled GeoTIFF or HDF5 format, with metadata."""
+
 from __future__ import annotations
 
 import argparse
@@ -24,6 +26,7 @@ SPLIT_MAP = {"MAIN": "train", "VALIDATION": "val", "CALIBRATION": "test"}
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse CLI arguments."""
     p = argparse.ArgumentParser(description="Process S2 Cloud Mask Catalogue")
     p.add_argument("--input", type=Path, required=True, help="Raw dataset root")
     p.add_argument("--output", type=Path, required=True, help="Output dataset root")
@@ -34,6 +37,15 @@ def parse_args() -> argparse.Namespace:
 
 
 def assign_splits(tiles_csv: Path, tags_csv: Path) -> None:
+    """Assign train/val/test splits to tiles based on the classification tags.
+
+    Args:
+        tiles_csv: Path to the CSV file describing the tiles and their metadata.
+        tags_csv: Path to the CSV file containing the classification and split tags.
+
+    Raises:
+        ValueError: If there are unknown dataset values in the tags CSV.
+    """
     tags = pd.read_csv(tags_csv)[["scene", "dataset"]]
     tags["split"] = tags["dataset"].str.upper().map(SPLIT_MAP)
 
@@ -60,6 +72,15 @@ def assign_splits(tiles_csv: Path, tags_csv: Path) -> None:
 
 
 def process(input_dir: Path, output_dir: Path, bands_csv: Path, tile_size: int, fmt: str) -> None:
+    """Process the raw S2 Cloud Mask Catalogue into tiled GeoTIFF or HDF5 format, with metadata.
+
+    Args:
+        input_dir: The directory containing the raw S2 Cloud Mask Catalogue data.
+        output_dir: The directory where the processed data will be saved.
+        bands_csv: The path to the CSV file containing band information.
+        tile_size: The size of each tile in pixels.
+        fmt: The format to save the processed data in (either "geotiff" or "hdf5").
+    """
     subscene_dir = input_dir / "subscenes"
     mask_dir = input_dir / "masks"
     tags_csv = input_dir / "classification_tags.csv"
@@ -106,6 +127,7 @@ def process(input_dir: Path, output_dir: Path, bands_csv: Path, tile_size: int, 
 
 
 def main() -> None:
+    """Main entry point for the script."""
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s — %(levelname)s — %(message)s",

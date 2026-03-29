@@ -1,3 +1,5 @@
+"""LightningDataModule for Sentinel-2 datasets."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -13,6 +15,23 @@ FORMAT_MAP = {"geotiff": GeoTIFFDataset, "hdf5": HDF5Dataset}
 
 
 class S2DataModule(pl.LightningDataModule):
+    """Provides Sentinel-2 dataloaders for training and evaluation.
+
+    Args:
+        dataset_dir: Location of the dataset, containing the image and mask files.
+        tiles_csv: Path to the CSV file describing the tiles and their metadata.
+        format: The format in which the dataset is stored, either 'geotiff' or 'hdf5'.
+        bands: List of band indices to load (0-12), or None to load all bands. Defaults to None.
+        batch_size: Batch size for the dataloaders. Defaults to 16.
+        num_workers: Number of worker processes for data loading. Defaults to 4.
+        pin_memory: Whether to use pinned memory for data loading. Defaults to True.
+        train_transform: Optional transform to apply to training images and masks.
+        val_transform: Optional transform to apply to validation and test images and masks.
+
+    Raises:
+        ValueError: If an unknown format is specified, or if indices are out of range or not unique.
+    """
+
     def __init__(
         self,
         dataset_dir: str | Path,
@@ -25,7 +44,6 @@ class S2DataModule(pl.LightningDataModule):
         train_transform=None,
         val_transform=None,
     ) -> None:
-
         super().__init__()
         self.save_hyperparameters(ignore=["train_transform", "val_transform"])
 
@@ -49,6 +67,15 @@ class S2DataModule(pl.LightningDataModule):
 
     @classmethod
     def from_yaml(cls, config_path: str | Path, **overrides) -> S2DataModule:
+        """Loads config, if provided in YAML format.
+
+        Args:
+            config_path: Path to the YAML config file.
+            **overrides: Any config values to override from the YAML file.
+
+        Returns:
+            S2DataModule: An instance of S2DataModule initialized with the config values.
+        """
         with open(config_path) as f:
             cfg = yaml.safe_load(f)
         cfg.update(overrides)
@@ -64,6 +91,7 @@ class S2DataModule(pl.LightningDataModule):
         )
 
     def setup(self, stage: str | None = None) -> None:
+        """Sets up the datasets for the specified stage."""
         if stage in ("fit", None):
             self._train_ds = self._make_dataset("train", self.train_transform)
             self._val_ds = self._make_dataset("val", self.val_transform)
@@ -81,10 +109,13 @@ class S2DataModule(pl.LightningDataModule):
         )
 
     def train_dataloader(self) -> DataLoader:
+        """Provides the training dataloader."""
         return self._make_loader(self._train_ds, shuffle=True)
 
     def val_dataloader(self) -> DataLoader:
+        """Provides the validation dataloader."""
         return self._make_loader(self._val_ds, shuffle=False)
 
     def test_dataloader(self) -> DataLoader:
+        """Provides the test dataloader."""
         return self._make_loader(self._test_ds, shuffle=False)

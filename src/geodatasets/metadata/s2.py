@@ -1,3 +1,5 @@
+"""Sentinel-2-specific metadata writer."""
+
 from __future__ import annotations
 
 import uuid
@@ -14,6 +16,13 @@ CLASS_MAP = {0: "CLEAR", 1: "CLOUD", 2: "CLOUD_SHADOW"}
 
 
 class S2CatalogueMetadataWriter(BaseMetadataWriter):
+    """Metadata writer for Sentinel-2 datasets format. Implements abstract BaseMetadataWriter.
+
+    Args:
+        output_dir: Root directory where metadata files will be saved.
+        bands_csv: Path to the CSV file describing the Sentinel-2 bands.
+    """
+
     TILES_FILENAME = "tiles.csv"
     DATASET_FILENAME = "dataset.json"
 
@@ -32,6 +41,16 @@ class S2CatalogueMetadataWriter(BaseMetadataWriter):
         mask_filename: str,
         bbox: tuple[float, float, float, float] | None = None,
     ) -> None:
+        """Record a tile's metadata.
+
+        Args:
+            descriptor: TileDescriptor object describing the tile position.
+            mask_tile: The tile's mask array.
+            product_id: The product ID.
+            image_filename: The filename of the image file.
+            mask_filename: The filename of the mask file.
+            bbox: The bounding box coordinates. Defaults to None.
+        """
         record = TileRecordSchema(
             tile_id=str(uuid.uuid4()),
             image_filename=image_filename,
@@ -52,6 +71,7 @@ class S2CatalogueMetadataWriter(BaseMetadataWriter):
         self._records.append(record)
 
     def save(self) -> None:
+        """Save the recorded tile metadata to a CSV file."""
         if not self._records:
             raise RuntimeError("no tile records to save — call record_tile() first")
         out = self.output_dir / self.TILES_FILENAME
@@ -59,6 +79,7 @@ class S2CatalogueMetadataWriter(BaseMetadataWriter):
         print(f"saved {len(self._records)} tile records → {out}")
 
     def save_dataset_level(self) -> None:
+        """Save dataset-level metadata to a JSON file."""
         df = pd.read_csv(self._bands_csv, comment="#")
         bands = [BandInfoSchema(**row) for row in df.to_dict(orient="records")]
         meta = DatasetMetaSchema(class_map={str(k): v for k, v in CLASS_MAP.items()}, bands=bands)
@@ -68,7 +89,9 @@ class S2CatalogueMetadataWriter(BaseMetadataWriter):
 
     @property
     def tile_count(self) -> int:
+        """Return the number of recorded tiles."""
         return len(self._records)
 
     def as_dataframe(self) -> pd.DataFrame:
+        """Return the recorded tile metadata as a pandas DataFrame."""
         return pd.DataFrame([r.model_dump() for r in self._records])

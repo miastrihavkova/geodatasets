@@ -1,3 +1,5 @@
+"""Schema for datamodule configuration and dataset metadata."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,6 +9,8 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class S2DataModuleConfig(BaseModel):
+    """Schema for configuration of the S2DataModule."""
+
     dataset_dir: Path
     tiles_csv: Path
     format: Literal["hdf5", "geotiff"]
@@ -18,6 +22,7 @@ class S2DataModuleConfig(BaseModel):
     @field_validator("dataset_dir", "tiles_csv", mode="before")
     @classmethod
     def path_exists(cls, v: str | Path) -> Path:
+        """Validates that the given path exists."""
         p = Path(v)
         if not p.exists():
             raise ValueError(f"path does not exist: {p}")
@@ -26,6 +31,7 @@ class S2DataModuleConfig(BaseModel):
     @field_validator("bands")
     @classmethod
     def valid_band_indices(cls, v: list[int] | None) -> list[int] | None:
+        """Validates that band indices are between 0 and 12 and are unique."""
         if v is None:
             return v
         for b in v:
