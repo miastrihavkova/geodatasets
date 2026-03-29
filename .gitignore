@@ -1,8 +1,28 @@
+# Ignore data files and directories
+data/raw/
+data/processed/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+dist/
+*.egg-info/
 .venv/
 __pycache__/
 *.pyc
 .poetry/
-dist/
-build/
-data/raw/
-data/processed/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# mypy / ruff caches
+.mypy_cache/
+.ruff_cache/
+
+# pytest
+.pytest_cache/

@@ -7,15 +7,13 @@ from pathlib import Path
 import requests
 from tqdm import tqdm
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s — %(levelname)s — %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s — %(levelname)s — %(message)s")
 log = logging.getLogger(__name__)
 
 ZENODO_API = "https://zenodo.org/api/records"
 CHUNK = 1024 * 1024  # 1 MB
 # Optionally add files to skip
-SKIP_FILES = {}
+SKIP_FILES: set[str] = set()
 
 
 def md5_of(path: Path) -> str:
@@ -101,9 +99,7 @@ def download_record(record_id: str, output_dir: Path, *, extract: bool = True) -
             continue
 
         dest = output_dir / entry["key"]
-        download_file(
-            entry["links"]["self"], dest, strip_md5_prefix(entry.get("checksum", ""))
-        )
+        download_file(entry["links"]["self"], dest, strip_md5_prefix(entry.get("checksum", "")))
 
         if extract and dest.suffix == ".zip":
             extract_zip(dest, output_dir)
@@ -112,12 +108,8 @@ def download_record(record_id: str, output_dir: Path, *, extract: bool = True) -
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--record-id", default="4172871", help="Zenodo record ID")
-    p.add_argument(
-        "--output-dir", type=Path, default=Path("data/raw"), help="Download destination"
-    )
-    p.add_argument(
-        "--no-extract", dest="extract", action="store_false", help="Skip ZIP extraction"
-    )
+    p.add_argument("--output-dir", type=Path, default=Path("data/raw"), help="Download destination")
+    p.add_argument("--no-extract", dest="extract", action="store_false", help="Skip ZIP extraction")
     return p.parse_args()
 
 
