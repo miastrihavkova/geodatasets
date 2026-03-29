@@ -46,7 +46,7 @@ def assign_splits(tiles_csv: Path, tags_csv: Path) -> None:
     Raises:
         ValueError: If there are unknown dataset values in the tags CSV.
     """
-    tags = pd.read_csv(tags_csv)[["scene", "dataset"]]
+    tags = pd.read_csv(tags_csv)[["scene", "dataset", "shadows_marked"]]
     tags["split"] = tags["dataset"].str.upper().map(SPLIT_MAP)
 
     unknown = tags[tags["split"].isna()]["dataset"].unique().tolist()
@@ -54,7 +54,12 @@ def assign_splits(tiles_csv: Path, tags_csv: Path) -> None:
         raise ValueError(f"unknown dataset values in tags CSV: {unknown}")
 
     df = pd.read_csv(tiles_csv)
-    df = df.merge(tags[["scene", "split"]], left_on="product_id", right_on="scene", how="left")
+    df = df.merge(
+        tags[["scene", "split", "shadows_marked"]],
+        left_on="product_id",
+        right_on="scene",
+        how="left",
+    )
     df = df.drop(columns=["scene"])
 
     n_missing = df["split"].isna().sum()

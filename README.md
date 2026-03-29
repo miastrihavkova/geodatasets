@@ -213,3 +213,11 @@ poetry run mypy src/
 # Documentation check
 poetry run pydocstyle src/
 ```
+
+---
+
+## Development notes
+
+This project was developed with assistance from [Claude](https://claude.ai) (Anthropic),
+used as an pair programmer for architecture decisions, debugging, and code review.
+All code was reviewed, tested, and validated by the author.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import uuid
 from pathlib import Path
 
@@ -11,6 +12,8 @@ import pandas as pd
 from geodatasets.schemas import BandInfoSchema, DatasetMetaSchema, TileDescriptor, TileRecordSchema
 
 from .base import BaseMetadataWriter
+
+log = logging.getLogger(__name__)
 
 CLASS_MAP = {0: "CLEAR", 1: "CLOUD", 2: "CLOUD_SHADOW"}
 
@@ -76,7 +79,7 @@ class S2CatalogueMetadataWriter(BaseMetadataWriter):
             raise RuntimeError("no tile records to save — call record_tile() first")
         out = self.output_dir / self.TILES_FILENAME
         pd.DataFrame([r.model_dump() for r in self._records]).to_csv(out, index=False)
-        print(f"saved {len(self._records)} tile records → {out}")
+        log.info(f"saved {len(self._records)} tile records → {out}")
 
     def save_dataset_level(self) -> None:
         """Save dataset-level metadata to a JSON file."""
@@ -85,7 +88,7 @@ class S2CatalogueMetadataWriter(BaseMetadataWriter):
         meta = DatasetMetaSchema(class_map={str(k): v for k, v in CLASS_MAP.items()}, bands=bands)
         out = self.output_dir / self.DATASET_FILENAME
         out.write_text(meta.model_dump_json(indent=2))
-        print(f"saved dataset-level metadata → {out}")
+        log.info(f"saved dataset-level metadata → {out}")
 
     @property
     def tile_count(self) -> int:
